@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "353919537487",
+    "firebase_url": "https://covid-347ff.firebaseio.com",
+    "project_id": "covid-347ff",
+    "storage_bucket": "covid-347ff.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:353919537487:android:187ee64d905c216c86353a",
+        "android_client_info": {
+          "package_name": "com.tendoll.covid"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "353919537487-5q5hm7itkl0muf51fsnaj0082mf4l9fs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tendoll.covid",
+            "certificate_hash": "ae082be26572a4029e9d6a91dfff1b486ce197be"
+          }
+        },
+        {
+          "client_id": "353919537487-urr8eijk6e5hnems8lq5f6nin6094l28.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCg-INsKbUETFuxjXeHOl6fcZANAwRnIgc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "353919537487-urr8eijk6e5hnems8lq5f6nin6094l28.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
