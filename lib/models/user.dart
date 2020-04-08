@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class UserModel {
   static const NUMBER = "name";
   static const ID = "id";
+
   static const CLOSE_CONTACTS = "closeContacts";
 
   String _name;

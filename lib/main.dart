@@ -1,5 +1,6 @@
 import 'package:covid/providers/auth.dart';
 import 'package:covid/screens/login.dart';
+import 'package:covid/screens/on_boarding.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: Login()
+      home: OnBoarding()
     );
   }
 }
