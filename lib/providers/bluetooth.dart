@@ -1,9 +1,10 @@
 import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:wifi_info_plugin/wifi_info_plugin.dart';
 
 class BlueToothProvider with ChangeNotifier{
-  FlutterBlue flutterBlue = FlutterBlue.instance;
 
   BlueToothProvider.initialize(){
     searchForDevices();
@@ -11,30 +12,15 @@ class BlueToothProvider with ChangeNotifier{
 
   Future<void> searchForDevices()async{
     print("started the search");
-    String id = await _getId();
+    WifiInfoWrapper wifiObject = await  WifiInfoPlugin.wifiDetails;
 
-    print("THE CURRENT DEVICE ID ID: $id");
 
-    bool on = await flutterBlue.isOn;
-    if(!on){
-      print("==== TURN ON YOUR BLUETHOOTH PLEASE ====");
-      return;
-    }
+    print("THE CURRENT DEVICE ID ID: ${wifiObject.ssid}");
 
-    print("scaning");
-    // Start scanning
-    flutterBlue.startScan(timeout: Duration(seconds: 40));
+    FlutterBlue flutterBlue = FlutterBlue.instance;
 
-// Listen to scan results
-    var subscription = flutterBlue.scanResults.listen((results) {
-      // do something with scan results
-      for (ScanResult r in results) {
-        print('${r.device.id} found! rssi: ${r.rssi}');
-      }
-    });
 
-    // Stop scanning
-    flutterBlue.stopScan();
+
 
 
   }
@@ -46,7 +32,7 @@ class BlueToothProvider with ChangeNotifier{
 //        return iosDeviceInfo.identifierForVendor; // unique ID on iOS
 //      } else {
     AndroidDeviceInfo androidDeviceInfo = await deviceInfo.androidInfo;
-    return androidDeviceInfo.androidId; // unique ID on Android
+    return androidDeviceInfo.androidId;// unique ID on Android
 //      }
   }
 }

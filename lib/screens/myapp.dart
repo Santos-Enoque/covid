@@ -17,7 +17,6 @@ class _BlueState extends State<Blue> {
   @override
   void initState() {
     super.initState();
-
     _bluetooth.devices.listen((device) {
       setState(() {
         _data += device.name+' (${device.address})\n';

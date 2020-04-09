@@ -1,5 +1,6 @@
 import 'package:covid/providers/auth.dart';
 import 'package:covid/providers/bluetooth.dart';
+import 'package:covid/screens/enter_blue_address.dart';
 import 'package:covid/screens/home.dart';
 import 'package:covid/screens/login.dart';
 import 'package:covid/screens/on_boarding.dart';
@@ -43,30 +44,24 @@ class ScreensController extends StatelessWidget {
       return Splash();
     }else{
       if(auth.logedIn){
-        return Home();
+//        the returned widget will depend on wheather the user is bluetooth address or not
+       return whichWidgetToReturn(auth.bluetoothSet);
       }else{
         if(auth.firstOpen){
           return OnBoarding();
         }else{
-          return Login();
+          return whichWidgetToReturn(auth.bluetoothSet);
         }
       }
     }
+  }
 
-//    switch(auth.status){
-//      case Status.Uninitialized:
-//        return Splash();
-//      case Status.Unauthenticated:
-//      case Status.Authenticating:
-//        if(auth.firstOpen){
-//          return OnBoarding();
-//        }
-//        return Login();
-//        break;
-//      case Status.Authenticated:
-//        return Home();
-//      default:    return Login();
-//    }
+  Widget whichWidgetToReturn(bool setBluetoothAddress){
+    if(setBluetoothAddress){
+      return Home();
+    }else{
+      return BluetoothAddress();
+    }
   }
 }
 

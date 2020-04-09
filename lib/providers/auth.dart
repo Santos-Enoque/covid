@@ -26,7 +26,56 @@ class AuthProvider with ChangeNotifier{
   bool firstOpen;
   bool logedIn;
   bool loading = false;
+  bool bluetoothSet;
 
+
+
+
+//  getter
+  UserModel get userModel => _userModel;
+  Status get status => _status;
+  FirebaseUser get user => _user;
+
+
+
+
+  AuthProvider.initialize(){
+    readPrefs();
+  }
+
+  Future signOut()async{
+    _auth.signOut();
+    _status = Status.Unauthenticated;
+    notifyListeners();
+    return Future.delayed(Duration.zero);
+  }
+
+  Future<void> readPrefs()async{
+    await Future.delayed(Duration(seconds: 3)).then((v)async {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      firstOpen = prefs.getBool('firstOpen') ?? true;
+      logedIn = prefs.getBool('logedIn') ?? false;
+
+      if(!logedIn){
+        _status = Status.Unauthenticated;
+      }else{
+        _user = await _auth.currentUser();
+        _userModel = await _userServicse.getUserById(_user.uid);
+        if(_userModel.bluetoothAddress != null){
+          await prefs.setBool("bluetoothSet", true);
+        }
+        _status = Status.Authenticated;
+      }
+
+      bluetoothSet = prefs.getBool('bluetoothSet') ?? false;
+
+
+      if(firstOpen){
+        await prefs.setBool("firstOpen", false);
+      }
+      notifyListeners();
+    });
+  }
 
 // ! PHONE AUTH
   Future<void> verifyPhone(BuildContext context, String number) async {
@@ -61,7 +110,7 @@ class AuthProvider with ChangeNotifier{
     notifyListeners();
   }
 
-    Future<bool> smsOTPDialog(BuildContext context) {
+  Future<bool> smsOTPDialog(BuildContext context) {
     return showDialog(
         context: context,
         barrierDismissible: false,
@@ -89,13 +138,17 @@ class AuthProvider with ChangeNotifier{
               FlatButton(
                 child: Text('Done'),
                 onPressed: ()async {
+                  loading = true;
+                  notifyListeners();
                   _auth.currentUser().then((user) async{
                     if (user != null) {
                       _userModel = await _userServicse.getUserById(user.uid);
-                        if(_userModel == null){
-                          _createUser(id: user.uid, number: user.phoneNumber);
-                        }
+                      if(_userModel == null){
+                        _createUser(id: user.uid, number: user.phoneNumber);
+                      }
                       Navigator.of(context).pop();
+                      loading = false;
+                      notifyListeners();
                       changeScreenReplacement(context, Home());
                     } else {
                       loading = true;
@@ -111,7 +164,7 @@ class AuthProvider with ChangeNotifier{
         });
   }
 
-  
+
   signIn(BuildContext context) async {
     try {
       final AuthCredential credential = PhoneAuthProvider.getCredential(
@@ -129,6 +182,9 @@ class AuthProvider with ChangeNotifier{
         if(_userModel == null){
           _createUser(id: user.user.uid, number: user.user.phoneNumber);
         }
+        if(_userModel.bluetoothAddress != null){
+          await prefs.setBool("bluetoothSet", true);
+        }
         loading = false;
         Navigator.of(context).pop();
         changeScreenReplacement(context, Home());
@@ -136,8 +192,8 @@ class AuthProvider with ChangeNotifier{
       loading = false;
 
       Navigator.of(context).pop();
-                      changeScreenReplacement(context, Home());
-                      notifyListeners();
+      changeScreenReplacement(context, Home());
+      notifyListeners();
 
     } catch (e) {
       handleError(e, context);
@@ -152,14 +208,14 @@ class AuthProvider with ChangeNotifier{
     switch (error.code) {
       case 'ERROR_INVALID_VERIFICATION_CODE':
         FocusScope.of(context).requestFocus(new FocusNode());
-          errorMessage = 'Invalid Code';
+        errorMessage = 'Invalid Code';
         Navigator.of(context).pop();
         smsOTPDialog(context).then((value) {
           print('sign in');
         });
         break;
       default:
-          errorMessage = error.message;
+        errorMessage = error.message;
         break;
     }
     notifyListeners();
@@ -170,61 +226,17 @@ class AuthProvider with ChangeNotifier{
       "id": id,
       "number": number,
       "closeContacts": [],
-      "deviceId": ""
+      "bluetoothAddress": ""
     });
   }
 
-//  getter
-  UserModel get userModel => _userModel;
-  Status get status => _status;
-  FirebaseUser get user => _user;
-
-
-
-
-  AuthProvider.initialize(){
-    readPrefs();
-  }
-
-  Future signOut()async{
-    _auth.signOut();
-    _status = Status.Unauthenticated;
-    notifyListeners();
-    return Future.delayed(Duration.zero);
-  }
-
-  Future<void> readPrefs()async{
-    await Future.delayed(Duration(seconds: 3)).then((v)async {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      firstOpen = prefs.getBool('firstOpen') ?? true;
-      logedIn = prefs.getBool('logedIn') ?? false;
-      if(!logedIn){
-        _status = Status.Unauthenticated;
-      }else{
-        _user = await _auth.currentUser();
-        _status = Status.Authenticated;
-      }
-
-      if(firstOpen){
-        await prefs.setBool("firstOpen", false);
-      }
-      notifyListeners();
-    });
-  }
-
-  Future<void> _onStateChanged(FirebaseUser firebaseUser) async{
+  Future<void> setBluetoothAddress({String id, String bluetoothAddress})async{
+    updateUser({"id":id, "bluetoothAddress": bluetoothAddress});
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    firstOpen = prefs.getBool('firstOpen') ?? true;
-    if(firstOpen){
-      await prefs.setBool("firstOpen", false);
-    }
-    if(firebaseUser == null){
-      _status = Status.Unauthenticated;
-    }else{
-      _user = firebaseUser;
-      _status = Status.Authenticated;
-//      _userModel = await _userServicse.getUserById(user.uid);
-    }
-    notifyListeners();
+    await prefs.setBool("bluetoothSet", true);
+  }
+
+  void updateUser(Map values){
+    _userServicse.updateUserData(values);
   }
 }

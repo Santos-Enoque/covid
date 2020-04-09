@@ -28,6 +28,9 @@ dependencies:
   flutter_blue: ^0.7.1+1
   device_info: ^0.4.0+4
   flutter_scan_bluetooth: ^1.1.0
+  wifi_info_plugin: ^1.0.6
+  flutter_bluetooth_serial: ^0.2.2
+  app_settings: 3.0.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
