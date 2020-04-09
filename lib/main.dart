@@ -1,6 +1,8 @@
 import 'package:covid/providers/auth.dart';
+import 'package:covid/screens/home.dart';
 import 'package:covid/screens/login.dart';
 import 'package:covid/screens/on_boarding.dart';
+import 'package:covid/screens/splash.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -24,7 +26,44 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: OnBoarding()
+      home: ScreensController()
     );
   }
 }
+
+
+class ScreensController extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final auth = Provider.of<AuthProvider>(context);
+    if(auth.status == Status.Uninitialized){
+      return Splash();
+    }else{
+      if(auth.logedIn){
+        return Home();
+      }else{
+        if(auth.firstOpen){
+          return OnBoarding();
+        }else{
+          return Login();
+        }
+      }
+    }
+
+//    switch(auth.status){
+//      case Status.Uninitialized:
+//        return Splash();
+//      case Status.Unauthenticated:
+//      case Status.Authenticating:
+//        if(auth.firstOpen){
+//          return OnBoarding();
+//        }
+//        return Login();
+//        break;
+//      case Status.Authenticated:
+//        return Home();
+//      default:    return Login();
+//    }
+  }
+}
+

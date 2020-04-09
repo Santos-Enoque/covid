@@ -7,12 +7,13 @@ import 'package:covid/screens/home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 enum Status{Uninitialized, Authenticated, Authenticating, Unauthenticated}
 
 class AuthProvider with ChangeNotifier{
-  FirebaseAuth _auth;
+  FirebaseAuth _auth = FirebaseAuth.instance;
   FirebaseUser _user;
   Status _status = Status.Uninitialized;
   // Firestore _firestore = Firestore.instance;
@@ -22,9 +23,13 @@ class AuthProvider with ChangeNotifier{
   String smsOTP;
   String verificationId;
   String errorMessage = '';
+  bool firstOpen;
+  bool logedIn;
+  bool loading = false;
+
 
 // ! PHONE AUTH
-  Future<void> verifyPhone(BuildContext context) async {
+  Future<void> verifyPhone(BuildContext context, String number) async {
     final PhoneCodeSent smsOTPSent = (String verId, [int forceCodeResend]) {
       this.verificationId = verId;
       smsOTPDialog(context).then((value) {
@@ -33,7 +38,7 @@ class AuthProvider with ChangeNotifier{
     };
     try {
       await _auth.verifyPhoneNumber(
-          phoneNumber: "+258871767777", // PHONE NUMBER TO SEND OTP
+          phoneNumber: number.trim(), // PHONE NUMBER TO SEND OTP
           codeAutoRetrievalTimeout: (String verId) {
             //Starts the phone number verification process for the given phone number.
             //Either sends an SMS with a 6 digit code to the phone number specified, or sign's the user in and [verificationCompleted] is called.
@@ -43,13 +48,15 @@ class AuthProvider with ChangeNotifier{
           smsOTPSent, // WHEN CODE SENT THEN WE OPEN DIALOG TO ENTER OTP.
           timeout: const Duration(seconds: 20),
           verificationCompleted: (AuthCredential phoneAuthCredential) {
-            print(phoneAuthCredential);
+            print(phoneAuthCredential.toString() + "lets make this work");
           },
           verificationFailed: (AuthException exceptio) {
-            print('${exceptio.message}');
+            print('${exceptio.message} + something is wrong');
           });
     } catch (e) {
       handleError(e, context);
+      errorMessage = e.toString();
+      notifyListeners();
     }
     notifyListeners();
   }
@@ -59,7 +66,7 @@ class AuthProvider with ChangeNotifier{
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return new AlertDialog(
+          return  AlertDialog(
             title: Text('Enter SMS Code'),
             content: Container(
               height: 85,
@@ -81,12 +88,19 @@ class AuthProvider with ChangeNotifier{
             actions: <Widget>[
               FlatButton(
                 child: Text('Done'),
-                onPressed: () {
-                  _auth.currentUser().then((user) {
+                onPressed: ()async {
+                  _auth.currentUser().then((user) async{
                     if (user != null) {
+                      _userModel = await _userServicse.getUserById(user.uid);
+                        if(_userModel == null){
+                          _createUser(id: user.uid, number: user.phoneNumber);
+                        }
                       Navigator.of(context).pop();
                       changeScreenReplacement(context, Home());
                     } else {
+                      loading = true;
+                      notifyListeners();
+                      Navigator.of(context).pop();
                       signIn(context);
                     }
                   });
@@ -107,6 +121,20 @@ class AuthProvider with ChangeNotifier{
       final AuthResult user = await _auth.signInWithCredential(credential);
       final FirebaseUser currentUser = await _auth.currentUser();
       assert(user.user.uid == currentUser.uid);
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setBool("logedIn", true);
+      logedIn =  true;
+      if (user != null) {
+        _userModel = await _userServicse.getUserById(user.user.uid);
+        if(_userModel == null){
+          _createUser(id: user.user.uid, number: user.user.phoneNumber);
+        }
+        loading = false;
+        Navigator.of(context).pop();
+        changeScreenReplacement(context, Home());
+      }
+      loading = false;
+
       Navigator.of(context).pop();
                       changeScreenReplacement(context, Home());
                       notifyListeners();
@@ -119,6 +147,8 @@ class AuthProvider with ChangeNotifier{
 
   handleError(error, BuildContext context) {
     print(error);
+    errorMessage = error.toString();
+    notifyListeners();
     switch (error.code) {
       case 'ERROR_INVALID_VERIFICATION_CODE':
         FocusScope.of(context).requestFocus(new FocusNode());
@@ -135,20 +165,25 @@ class AuthProvider with ChangeNotifier{
     notifyListeners();
   }
 
+  void _createUser({String id, String number}){
+    _userServicse.createUser({
+      "id": id,
+      "number": number,
+      "closeContacts": [],
+      "deviceId": ""
+    });
+  }
+
 //  getter
   UserModel get userModel => _userModel;
   Status get status => _status;
   FirebaseUser get user => _user;
 
-  final formkey = GlobalKey<FormState>();
-
-  TextEditingController email = TextEditingController();
-  TextEditingController password = TextEditingController();
-  TextEditingController name = TextEditingController();
 
 
-  AuthProvider.initialize(): _auth = FirebaseAuth.instance{
-    _auth.onAuthStateChanged.listen(_onStateChanged);
+
+  AuthProvider.initialize(){
+    readPrefs();
   }
 
   Future signOut()async{
@@ -158,20 +193,37 @@ class AuthProvider with ChangeNotifier{
     return Future.delayed(Duration.zero);
   }
 
-  void clearController(){
-    name.text = "";
-    password.text = "";
-    email.text = "";
+  Future<void> readPrefs()async{
+    await Future.delayed(Duration(seconds: 3)).then((v)async {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      firstOpen = prefs.getBool('firstOpen') ?? true;
+      logedIn = prefs.getBool('logedIn') ?? false;
+      if(!logedIn){
+        _status = Status.Unauthenticated;
+      }else{
+        _user = await _auth.currentUser();
+        _status = Status.Authenticated;
+      }
+
+      if(firstOpen){
+        await prefs.setBool("firstOpen", false);
+      }
+      notifyListeners();
+    });
   }
 
-
   Future<void> _onStateChanged(FirebaseUser firebaseUser) async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    firstOpen = prefs.getBool('firstOpen') ?? true;
+    if(firstOpen){
+      await prefs.setBool("firstOpen", false);
+    }
     if(firebaseUser == null){
       _status = Status.Unauthenticated;
     }else{
       _user = firebaseUser;
       _status = Status.Authenticated;
-      _userModel = await _userServicse.getUserById(user.uid);
+//      _userModel = await _userServicse.getUserById(user.uid);
     }
     notifyListeners();
   }

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:covid/models/user.dart';
 
 class UserServices{
+
   String collection = "users";
   Firestore _firestore = Firestore.instance;
 
@@ -15,6 +16,9 @@ class UserServices{
   }
 
   Future<UserModel> getUserById(String id) => _firestore.collection(collection).document(id).get().then((doc){
+    if(doc == null){
+      return null;
+    }
     return UserModel.fromSnapshot(doc);
   });
 }

@@ -5,8 +5,9 @@ import 'package:provider/provider.dart';
 
 class CustomTextField extends StatelessWidget {
   final String hintText;
+  final TextEditingController controller;
 
-  const CustomTextField({Key key, this.hintText}) : super(key: key);
+  const CustomTextField({Key key, this.hintText, this.controller}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     final auth = Provider.of<AuthProvider>(context);
@@ -29,7 +30,7 @@ class CustomTextField extends StatelessWidget {
           padding: const EdgeInsets.only(left:8.0),
           child: TextField(
             keyboardType: TextInputType.number,
-            controller: auth.phoneNo,
+            controller: controller,
             decoration: InputDecoration(
               icon: Icon(Icons.phone_android, color: grey),
                 border: InputBorder.none,
