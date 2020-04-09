@@ -1,4 +1,5 @@
 import 'package:covid/providers/auth.dart';
+import 'package:covid/providers/bluetooth.dart';
 import 'package:covid/screens/home.dart';
 import 'package:covid/screens/login.dart';
 import 'package:covid/screens/on_boarding.dart';
@@ -11,8 +12,10 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
   runApp(MultiProvider(providers: [
-  ChangeNotifierProvider.value(value: AuthProvider.initialize())
-],
+  ChangeNotifierProvider.value(value: AuthProvider.initialize()),
+    ChangeNotifierProvider.value(value: BlueToothProvider.initialize()),
+
+  ],
 child: MyApp()));
 }
 
