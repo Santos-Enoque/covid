@@ -16,7 +16,7 @@ class UserServices{
   }
 
   Future<UserModel> getUserById(String id) => _firestore.collection(collection).document(id).get().then((doc){
-    if(doc == null){
+    if(doc.data == null){
       return null;
     }
     return UserModel.fromSnapshot(doc);

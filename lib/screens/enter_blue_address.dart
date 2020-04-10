@@ -14,7 +14,6 @@ class BluetoothAddress extends StatefulWidget {
 }
 
 class _BluetoothAddressState extends State<BluetoothAddress> {
-  TextEditingController address = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +50,6 @@ class _BluetoothAddressState extends State<BluetoothAddress> {
               padding: const EdgeInsets.all(8.0),
               child: Text("We're sorry for the extra work ;) \n Find the address at \n SETTINGS > ABOUT PHONE > STATUS", textAlign: TextAlign.center, style: TextStyle(color: grey),),
             ),
-            CustomText(text: auth.errorMessage ?? "", color: red,),
             Padding(
               padding: const EdgeInsets.only(left:12, right: 12, bottom: 12),
               child: Container(
@@ -70,8 +68,8 @@ class _BluetoothAddressState extends State<BluetoothAddress> {
                 child: Padding(
                   padding: const EdgeInsets.only(left:8.0),
                   child: TextField(
-                    keyboardType: TextInputType.phone,
-                    controller: null,
+//                    keyboardType: TextInputType.phone,
+                    controller: auth.address,
                     decoration: InputDecoration(
                         icon: Icon(Icons.bluetooth_audio, color: grey),
                         border: InputBorder.none,
@@ -89,7 +87,7 @@ class _BluetoothAddressState extends State<BluetoothAddress> {
 
             SizedBox(height: 10),
             CustomButton(msg: "Send Address", onTap: (){
-              auth.setBluetoothAddress(id: auth.user.uid, bluetoothAddress: address.text.trim());
+              auth.setBluetoothAddress(id: auth.user.uid, bluetoothAddress: auth.address.text.trim());
               changeScreenReplacement(context, Home());
             })
           ]),

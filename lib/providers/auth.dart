@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:covid/helpers/screen_navigation.dart';
 import 'package:covid/helpers/user.dart';
 import 'package:covid/models/user.dart';
+import 'package:covid/screens/enter_blue_address.dart';
 import 'package:covid/screens/home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -37,6 +38,7 @@ class AuthProvider with ChangeNotifier{
   FirebaseUser get user => _user;
 
 
+  TextEditingController address = TextEditingController();
 
 
   AuthProvider.initialize(){
@@ -56,13 +58,16 @@ class AuthProvider with ChangeNotifier{
       firstOpen = prefs.getBool('firstOpen') ?? true;
       logedIn = prefs.getBool('logedIn') ?? false;
 
+
       if(!logedIn){
         _status = Status.Unauthenticated;
       }else{
         _user = await _auth.currentUser();
         _userModel = await _userServicse.getUserById(_user.uid);
-        if(_userModel.bluetoothAddress != null){
-          await prefs.setBool("bluetoothSet", true);
+        if(_userModel != null){
+          if(_userModel.bluetoothAddress.isNotEmpty){
+            await prefs.setBool("bluetoothSet", true);
+          }
         }
         _status = Status.Authenticated;
       }
@@ -181,13 +186,19 @@ class AuthProvider with ChangeNotifier{
         _userModel = await _userServicse.getUserById(user.user.uid);
         if(_userModel == null){
           _createUser(id: user.user.uid, number: user.user.phoneNumber);
+        }else{
+          if(_userModel.bluetoothAddress != null){
+            await prefs.setBool("bluetoothSet", true);
+          }
         }
-        if(_userModel.bluetoothAddress != null){
-          await prefs.setBool("bluetoothSet", true);
-        }
+
         loading = false;
         Navigator.of(context).pop();
-        changeScreenReplacement(context, Home());
+        if(bluetoothSet){
+          changeScreenReplacement(context, Home());
+        }else{
+          changeScreenReplacement(context, BluetoothAddress());
+        }
       }
       loading = false;
 
@@ -231,12 +242,15 @@ class AuthProvider with ChangeNotifier{
   }
 
   Future<void> setBluetoothAddress({String id, String bluetoothAddress})async{
+    if(_userModel == null){
+      _createUser(id: _user.uid, number: _user.phoneNumber);
+    }
     updateUser({"id":id, "bluetoothAddress": bluetoothAddress});
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool("bluetoothSet", true);
   }
 
-  void updateUser(Map values){
+  void updateUser(Map<String, dynamic> values){
     _userServicse.updateUserData(values);
   }
 }

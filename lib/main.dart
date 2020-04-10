@@ -45,12 +45,16 @@ class ScreensController extends StatelessWidget {
     }else{
       if(auth.logedIn){
 //        the returned widget will depend on wheather the user is bluetooth address or not
-       return whichWidgetToReturn(auth.bluetoothSet);
+      print("The value is: ${auth.bluetoothSet}");
+      print("The value is: ${auth.bluetoothSet}");
+      print("The value is: ${auth.bluetoothSet}");
+
+      return whichWidgetToReturn(auth.bluetoothSet);
       }else{
         if(auth.firstOpen){
           return OnBoarding();
         }else{
-          return whichWidgetToReturn(auth.bluetoothSet);
+          return Login();
         }
       }
     }

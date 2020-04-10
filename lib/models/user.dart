@@ -9,7 +9,7 @@ class UserModel {
   String _number;
   String _id;
   String _bluetoothAddress;
-  List<String> _closeContacts;
+  List _closeContacts;
 
 //  getters
   String get number => _number;

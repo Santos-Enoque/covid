@@ -20,7 +20,7 @@ class _LoginState extends State<Login> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: white,
-        body: SingleChildScrollView(
+        body: auth.loading ? CircularProgressIndicator() : SingleChildScrollView(
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
             SizedBox(
               height: 30,
