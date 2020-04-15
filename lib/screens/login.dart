@@ -16,11 +16,10 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    final auth = Provider.of<AuthProvider>(context);
     return SafeArea(
       child: Scaffold(
         backgroundColor: white,
-        body: auth.loading ? CircularProgressIndicator() : SingleChildScrollView(
+        body:  SingleChildScrollView(
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
             SizedBox(
               height: 30,
@@ -44,7 +43,6 @@ class _LoginState extends State<Login> {
               TextSpan(text: " app"),
             ], style: TextStyle(color: black))),
             SizedBox(height: 10),
-            CustomText(text: auth.errorMessage ?? "", color: red,),
             Padding(
               padding: const EdgeInsets.only(left:12, right: 12, bottom: 12),
               child: Container(
@@ -86,7 +84,6 @@ class _LoginState extends State<Login> {
             ),
             SizedBox(height: 10),
             CustomButton(msg: "Verify", onTap: (){
-              auth.verifyPhone(context, number.text);
             })
           ]),
         ),

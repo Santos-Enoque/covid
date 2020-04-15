@@ -1,7 +1,5 @@
 import 'package:covid/helpers/style.dart';
-import 'package:covid/providers/auth.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class CustomTextField extends StatelessWidget {
   final String hintText;
@@ -10,7 +8,6 @@ class CustomTextField extends StatelessWidget {
   const CustomTextField({Key key, this.hintText, this.controller}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    final auth = Provider.of<AuthProvider>(context);
     return   Padding(
       padding: const EdgeInsets.only(left:12, right: 12, bottom: 12),
       child: Container(
