@@ -6,12 +6,7 @@ import 'package:provider/provider.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  runApp(MultiProvider(providers: [
-//  ChangeNotifierProvider.value(value: AuthProvider.initialize()),
-//    ChangeNotifierProvider.value(value: BlueToothProvider.initialize()),
-
-  ],
-child: MyApp()));
+  runApp( MyApp());
 }
 
 class MyApp extends StatelessWidget {
