@@ -1,6 +1,8 @@
 import 'package:covid/helpers/style.dart';
+import 'package:covid/providers/auth.dart';
 import 'package:covid/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class Home extends StatefulWidget {
   @override
@@ -11,6 +13,8 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = Provider.of<AuthProvider>(context);
+
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -22,7 +26,9 @@ class _HomeState extends State<Home> {
         backgroundColor: white,
         body:Column(
           children: <Widget>[
-            FlatButton(onPressed: (){}, child: Text("LogOUt"))
+            FlatButton(onPressed: (){
+              auth.signOut();
+            }, child: Text("LogOUt"))
           ],
         ),
       ),
