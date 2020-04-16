@@ -1,8 +1,8 @@
 import 'package:covid/helpers/style.dart';
 import 'package:covid/providers/auth.dart';
+import 'package:covid/screens/splash.dart';
 import 'package:covid/widgets/custom_button.dart';
 import 'package:covid/widgets/custom_text.dart';
-import 'package:covid/widgets/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -16,11 +16,12 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = Provider.of<AuthProvider>(context);
     return SafeArea(
       child: Scaffold(
         backgroundColor: white,
         body:  SingleChildScrollView(
-          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          child: auth.loading ? Splash() : Column(mainAxisAlignment: MainAxisAlignment.center, children: [
             SizedBox(
               height: 30,
             ),
@@ -84,6 +85,7 @@ class _LoginState extends State<Login> {
             ),
             SizedBox(height: 10),
             CustomButton(msg: "Verify", onTap: (){
+              auth.verifyPhoneNumber(context, number.text);
             })
           ]),
         ),
